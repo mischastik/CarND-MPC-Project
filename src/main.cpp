@@ -50,11 +50,11 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   assert(order >= 1 && order <= xvals.size() - 1);
   Eigen::MatrixXd A(xvals.size(), order + 1);
 
-  for (int i = 0; i < xvals.size(); i++) {
+  for (Eigen::Index i = 0; i < xvals.size(); i++) {
     A(i, 0) = 1.0;
   }
 
-  for (int j = 0; j < xvals.size(); j++) {
+  for (Eigen::Index j = 0; j < xvals.size(); j++) {
     for (int i = 0; i < order; i++) {
       A(j, i + 1) = A(j, i) * xvals(j);
     }
@@ -80,7 +80,8 @@ int main() {
     cout << sdata << endl;
     if (sdata.size() > 2 && sdata[0] == '4' && sdata[1] == '2') {
       string s = hasData(sdata);
-	  if (s != "") {
+	  if (s != "") 
+	  {
 		  auto j = json::parse(s);
 		  string event = j[0].get<string>();
 		  if (event == "telemetry") {
@@ -102,8 +103,13 @@ int main() {
 				  ptsx[i] = xt * cos(-psi) - yt * sin(-psi);
 				  ptsy[i] = xt * sin(-psi) + yt * cos(-psi);
 			  }
-			  Eigen::VectorXd ptsx_e = Eigen::VectorXd(ptsx);
-			  Eigen::VectorXd ptsy_e = Eigen::VectorXd(ptsy);
+			  //Eigen::VectorXd ptsx_e = Eigen::VectorXd(ptsx.data());
+			  //Eigen::VectorXd ptsy_e = Eigen::VectorXd(ptsy.data());
+			  double* ptrx = &ptsx[0];
+			  Eigen::Map<Eigen::VectorXd> ptsx_e(ptrx, 6);
+
+			  double* ptry = &ptsy[0];
+			  Eigen::Map<Eigen::VectorXd> ptsy_e(ptry, 6);
 			  /*
 			  * TODO: Calculate steering angle and throttle using MPC.
 			  *
@@ -153,7 +159,7 @@ int main() {
 			  for (size_t i = 0; i < vars.size(); i++)
 			  {
 				  mpc_x_vals.push_back(vars[i]);
-				  mpc_x_vals.push_back(vars[i+N]);
+				  mpc_x_vals.push_back(vars[i + MPC::N]);
 			  }
 
 			  msgJson["mpc_x"] = mpc_x_vals;
@@ -165,8 +171,8 @@ int main() {
 
 			  double pos = 0;
 			  // calculate roughly the distance traveled in time dt
-			  double increment = (ref_v * 1609.0 * dt) / 3600.0;
-			  for (int i = 1; i < N; i++) 
+			  double increment = (MPC::ref_v * 1609.0 * MPC::dt) / 3600.0;
+			  for (size_t i = 1; i < MPC::N; i++) 
 			  {
 				  next_x_vals.push_back(pos);
 				  next_y_vals.push_back(polyeval(coeffs, pos));
@@ -192,11 +198,12 @@ int main() {
 			  //
 			  // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
 			  // SUBMITTING.
-			  this_thread::sleep_for(chrono::milliseconds(latencySecs * 1000.0));
+			  this_thread::sleep_for(chrono::milliseconds((int)(latencySecs * 1000.0)));
 			  ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 		  }
 	  }
-	  else {
+	  else 
+	  {
 		  // Manual driving
 		  std::string msg = "42[\"manual\",{}]";
 		  ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
