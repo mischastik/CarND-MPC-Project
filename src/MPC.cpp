@@ -57,8 +57,8 @@ public:
 
 		// Minimize the use of actuators.
 		for (size_t t = 0; t < MPC::N - 1; t++) {
-			fg[0] += CppAD::pow(vars[delta_start + t], 2) * actuatorFactor;
-			fg[0] += CppAD::pow(vars[a_start + t], 2) * actuatorFactor;
+			fg[0] += CppAD::pow(vars[delta_start + t], 2);
+			fg[0] += CppAD::pow(vars[a_start + t], 2);
 		}
 
 		// Minimize the value gap between sequential actuations.
@@ -264,8 +264,13 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs, double 
 	//
 	// {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
 	// creates a 2 element double vector.
-	return { solution.x[x_start + 1],   solution.x[y_start + 1],
-		solution.x[psi_start + 1], solution.x[v_start + 1],
-		solution.x[cte_start + 1], solution.x[epsi_start + 1],
-		solution.x[delta_start],   solution.x[a_start] };
+	vector<double> result;
+	result.push_back(solution.x[delta_start]);
+	result.push_back(solution.x[a_start]);
+	for (size_t i = 0; i < N; i++)
+	{
+		result.push_back(solution.x[x_start + i]);
+		result.push_back(solution.x[y_start + i]);
+	}
+	return result;
 }

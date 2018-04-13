@@ -146,8 +146,8 @@ int main()
 					//std::cout << std::endl;
 
 
-					double steer_angle = -vars[6];
-					double throttle_value = vars[7];
+					double steer_angle = -vars[0];
+					double throttle_value = vars[1];
 
 					json msgJson;
 					// NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
@@ -161,10 +161,10 @@ int main()
 
 					//.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
 					// the points in the simulator are connected by a Green line
-					for (size_t i = 0; i < vars.size(); i++)
+					for (size_t i = 2; i < vars.size(); i+=2)
 					{
 						mpc_x_vals.push_back(vars[i]);
-						mpc_x_vals.push_back(vars[i + MPC::N]);
+						mpc_y_vals.push_back(vars[i + 1]);
 					}
 
 					msgJson["mpc_x"] = mpc_x_vals;
@@ -173,11 +173,14 @@ int main()
 					//Display the waypoints/reference line
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
-
+					double pos = 1.0;
 					for (size_t i = 0; i < mpc_x_vals.size(); i++)
 					{
-						next_x_vals.push_back(mpc_x_vals[i]);
-						next_y_vals.push_back(polyeval(coeffs, mpc_x_vals[i]));
+						//next_x_vals.push_back(mpc_x_vals[i]);
+						//next_y_vals.push_back(polyeval(coeffs, mpc_x_vals[i]));
+						next_x_vals.push_back(pos);
+						next_y_vals.push_back(polyeval(coeffs, pos));
+						pos += 1;
 					}
 
 
