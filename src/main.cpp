@@ -169,14 +169,10 @@ int main() {
 			  vector<double> next_x_vals;
 			  vector<double> next_y_vals;
 
-			  double pos = 0;
-			  // calculate roughly the distance traveled in time dt
-			  double increment = (MPC::ref_v * 1609.0 * MPC::dt) / 3600.0;
-			  for (size_t i = 1; i < MPC::N; i++) 
+			  for (size_t i = 0; i < mpc_x_vals.size(); i++) 
 			  {
-				  next_x_vals.push_back(pos);
-				  next_y_vals.push_back(polyeval(coeffs, pos));
-				  pos += increment;
+				  next_x_vals.push_back(mpc_x_vals[i]);
+				  next_y_vals.push_back(polyeval(coeffs, mpc_x_vals[i]));
 			  }
 
 
