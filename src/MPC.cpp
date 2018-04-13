@@ -108,7 +108,7 @@ public:
 			AD<double> delta0 = vars[delta_start + t - 1];
 			AD<double> a0 = vars[a_start + t - 1];
 
-			AD<double> f0 = coeffs[0] + coeffs[1] * x0 + coeffs_[2] * CppAD::pow(x0, 2) + coeffs_[3] * CppAD::pow(x0, 3);
+			AD<double> f0 = coeffs[0] + coeffs[1] * x0 + coeffs[2] * CppAD::pow(x0, 2) + coeffs_[3] * CppAD::pow(x0, 3);
 			AD<double> psides0 = CppAD::atan(coeffs[1] + 2.0 * coeffs_[2] * x0 + 3.0 * coeffs_[3] * CppAD::pow(x0, 2));
 
 			// Here's `x` to get you started.
