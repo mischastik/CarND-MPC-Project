@@ -2,6 +2,7 @@
 #include <cppad/cppad.hpp>
 #include <cppad/ipopt/solve.hpp>
 #include <chrono>
+#include <iostream>
 #include "Eigen-3.3/Eigen/Core"
 
 using CppAD::AD;
@@ -42,7 +43,8 @@ public:
 	}
 
 	typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
-	void operator()(ADvector& fg, const ADvector& vars) {
+	void operator()(ADvector& fg, const ADvector& vars) 
+	{
 		// implement MPC
 		// `fg` a vector of the cost constraints, `vars` is a vector of variable values (state & actuators)
 		// NOTE: You'll probably go back and forth between this function and
@@ -59,15 +61,15 @@ public:
 		// Minimize the use of actuators.
 		for (size_t t = 0; t < MPC::N - 1; t++)
 		{
-			fg[0] += 50 * CppAD::pow(vars[delta_start + t], 2);
-			fg[0] += CppAD::pow(vars[a_start + t], 2);
+			fg[0] += 300 * CppAD::pow(vars[delta_start + t], 2);
+			fg[0] += 100* CppAD::pow(vars[a_start + t], 2);
 		}
 
 		// Minimize the value gap between sequential actuations.
 		for (size_t t = 0; t < MPC::N - 2; t++) 
 		{
-			fg[0] += 100 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-			fg[0] += CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+			fg[0] += 300 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+			fg[0] += 100 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
 		}
 
 		//
@@ -106,10 +108,21 @@ public:
 			AD<double> cte0 = vars[cte_start + t - 1];
 			AD<double> epsi0 = vars[epsi_start + t - 1];
 
-			// TODO: Here we should model the time delay
+			// Here we should model the time delay
+			size_t delayedDeltaIndex = delta_start + t - latencyFrames;
+			size_t delayedAIndex = a_start + t - latencyFrames;
+			if (delayedDeltaIndex < delta_start)
+			{
+				delayedDeltaIndex = delta_start;
+			}
+			if (delayedAIndex < a_start)
+			{
+				delayedAIndex = a_start;
+			}
+
 			// Only consider the actuation at time t.
-			AD<double> delta0 = vars[delta_start + t - 1];
-			AD<double> a0 = vars[a_start + t - 1];
+			AD<double> delta0 = vars[delayedDeltaIndex];
+			AD<double> a0 = vars[delayedAIndex];
 
 			AD<double> f0 = coeffs[0] + coeffs[1] * x0 + coeffs[2] * CppAD::pow(x0, 2) + coeffs[3] * CppAD::pow(x0, 3);
 			AD<double> psides0 = CppAD::atan(coeffs[1] + 2.0 * coeffs[2] * x0 + 3.0 * coeffs[3] * CppAD::pow(x0, 2));
@@ -146,6 +159,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs, double 
 	bool ok = true;
 	typedef CPPAD_TESTVECTOR(double) Dvector;
 	int latencyFrames = (int)round(latencySecs / dt);
+	std::cout << "Latency frames: " << latencyFrames << std::endl;
 	double x = state[0];
 	double y = state[1];
 	double psi = state[2];

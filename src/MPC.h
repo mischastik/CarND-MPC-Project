@@ -11,9 +11,9 @@ using namespace std;
 
 class MPC {
 public:
-	static constexpr size_t N = 25;
-	static constexpr double dt = 0.05;
-	static constexpr double ref_v = 40;
+	static constexpr size_t N = 10;
+	static constexpr double dt = 0.1;
+	static constexpr double ref_v = 75;
 	MPC();
 
 	virtual ~MPC();

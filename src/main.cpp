@@ -127,10 +127,8 @@ int main()
 					double epsi = -atan(coeffs[1] /*+ 2 * coeffs[2] * ptsx_e[0] + 3 * coeffs[3] * ptsx_e[0] * ptsx_e[0]*/);
 					Eigen::VectorXd state(6);
 					state << 0, 0, 0, v, cte, epsi;
-					//int latency = 100;
-					//double latencySecs = 0.1;
-					//int latency = 0;
-					double latencySecs = 0;
+					double latencySecs = 0.1;
+					//double latencySecs = 0;
 
 					auto vars = mpc.Solve(state, coeffs, latencySecs);
 
@@ -173,14 +171,14 @@ int main()
 					//Display the waypoints/reference line
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
-					double pos = 1.0;
+					//double pos = 1.0;
 					for (size_t i = 0; i < mpc_x_vals.size(); i++)
 					{
-						//next_x_vals.push_back(mpc_x_vals[i]);
-						//next_y_vals.push_back(polyeval(coeffs, mpc_x_vals[i]));
-						next_x_vals.push_back(pos);
-						next_y_vals.push_back(polyeval(coeffs, pos));
-						pos += 1;
+						next_x_vals.push_back(mpc_x_vals[i]);
+						next_y_vals.push_back(polyeval(coeffs, mpc_x_vals[i]));
+						//next_x_vals.push_back(pos);
+						//next_y_vals.push_back(polyeval(coeffs, pos));
+						//pos += 1;
 					}
 
 
@@ -202,7 +200,7 @@ int main()
 					//
 					// NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
 					// SUBMITTING.
-					//this_thread::sleep_for(chrono::milliseconds((int)(latencySecs * 1000.0)));
+					this_thread::sleep_for(chrono::milliseconds((int)(latencySecs * 1000.0)));
 					ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 				}
 			}
