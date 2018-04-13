@@ -49,21 +49,24 @@ public:
 		// the Solver function below.
 		fg[0] = 0;
 		// The part of the cost based on the reference state.
-		for (size_t t = 0; t < MPC::N; t++) {
+		for (size_t t = 0; t < MPC::N; t++) 
+		{
 			fg[0] += CppAD::pow(vars[cte_start + t], 2);
 			fg[0] += CppAD::pow(vars[epsi_start + t], 2);
 			fg[0] += CppAD::pow(vars[v_start + t] - MPC::ref_v, 2);
 		}
 
 		// Minimize the use of actuators.
-		for (size_t t = 0; t < MPC::N - 1; t++) {
-			fg[0] += CppAD::pow(vars[delta_start + t], 2);
+		for (size_t t = 0; t < MPC::N - 1; t++)
+		{
+			fg[0] += 50 * CppAD::pow(vars[delta_start + t], 2);
 			fg[0] += CppAD::pow(vars[a_start + t], 2);
 		}
 
 		// Minimize the value gap between sequential actuations.
-		for (size_t t = 0; t < MPC::N - 2; t++) {
-			fg[0] += CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+		for (size_t t = 0; t < MPC::N - 2; t++) 
+		{
+			fg[0] += 100 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
 			fg[0] += CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
 		}
 
